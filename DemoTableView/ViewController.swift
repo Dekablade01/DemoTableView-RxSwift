@@ -7,19 +7,41 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
-class ViewController: UIViewController {
-
-    override func viewDidLoad() {
+class ViewController: UIViewController
+{
+    
+    @IBOutlet weak var tableView: UITableView!
+    
+    private let arrayOfPersons: [Person] = [Person(name: "A", age: 20),
+                                            Person(name: "B", age: 40)]
+    
+    private let disposeBag = DisposeBag()
+    
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        prepareTableViewDataSource()
     }
+    
+    func prepareTableViewDataSource()
+    {
+        let observableArray = Observable.just(arrayOfPersons)
+        
+        observableArray.bind(to: tableView.rx.items(cellIdentifier: "cell",
+                                                    cellType: UITableViewCell.self)){
+                                                        (row, person, cell) in
+                                                cell.textLabel?.text = person.name
+                                                cell.detailTextLabel?.text = "\(person.age)"
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+            }.addDisposableTo(disposeBag)
     }
-
-
 }
 
+
+struct Person {
+    var name: String
+    var age: Int
+}
